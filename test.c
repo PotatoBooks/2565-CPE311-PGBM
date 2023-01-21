@@ -8,8 +8,6 @@
 #include "stm32l1xx_ll_utils.h"
 #include "stm32l1xx_ll_system.h"
 #include "stm32l1xx_ll_tim.h"
-#include "stm32l1xx_ll_adc.h"
-#include "stdlib.h"
 
 #define TIMx_PSC 32 //define prescaler
 #define TIMx_ARR 20000 //define ARR
