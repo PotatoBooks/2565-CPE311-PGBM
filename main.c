@@ -25,11 +25,14 @@ void TIM_Base_Config(void); //function prototype
 void TIM_OC_GPIO_Config(void); //function prototype
 void TIM_OC_Config(void); //function prototype
 void ADC_Config(void);
+uint16_t ADC_Read(uint8_t);
 
 int pos = 90; // initial position of the Horizontal movement controlling servo motor
 int tolerance = 20; // allowable tolerance setting - so solar servo motor isn't constantly in motion
 int val1 = 0;
 int val2 = 0;
+uint16_t first_ldr;
+uint16_t second_ldr;
 
 int main()
 {
@@ -37,22 +40,24 @@ int main()
 	TIM_OC_Config();
 	ADC_Config();
 	while(1){
-		LL_ADC_REG_StartConversionSWStart(ADC1);
-		while(LL_ADC_IsActiveFlag_EOCS(ADC1) == RESET);
-		val1 = LL_ADC_REG_ReadConversionData12(ADC1);
-		val2 = LL_ADC_REG_ReadConversionData12(ADC1);
+//		LL_ADC_REG_StartConversionSWStart(ADC1);
+//		while(LL_ADC_IsActiveFlag_EOCS(ADC1) == RESET);
+//		val1 = LL_ADC_REG_ReadConversionData12(ADC1);
+//		val2 = LL_ADC_REG_ReadConversionData12(ADC1);
+	first_ldr = ADC_Read(4);
+	second_ldr = ADC_Read(5);
 		
-		if((abs(val1 - val2) >= tolerance) || (abs(val2 - val1) >= tolerance)) {
-			if(val1 > val2)
-				pos += 1;
-			else if(val1 < val2)
-				pos -= 1;
+	if((abs(val1 - val2) >= tolerance) || (abs(val2 - val1) >= tolerance)) {
+		if(val1 > val2)
+			pos += 1;
+		else if(val1 < val2)
+			pos -= 1;
 		}
-			if(pos > 180)
-				pos = 180;
-			if(pos < 0)
-				pos = 0;
-      LL_TIM_OC_SetCompareCH1(TIM4, pos);
+	if(pos > 180)
+			pos = 180;
+	if(pos < 0)
+			pos = 0;
+    LL_TIM_OC_SetCompareCH1(TIM4, pos);
 
     LL_mDelay(50);
 	}
@@ -103,12 +108,36 @@ void TIM_OC_Config(void){
 	LL_TIM_EnableCounter(TIM4);
 }
 
-void ADC_Config(void)
+void ADC_Config(void) {
+    // Enable clock for ADC1
+    RCC->APB2ENR |= RCC_APB2ENR_ADC1EN;
+    // Set ADC to single conversion mode
+    ADC1->CR2 &= ~ADC_CR2_CONT;
+    // Enable channel 4 and 5
+    ADC1->CR1 |= ADC_CR1_EOCIE;
+    ADC1->SQR3 |= (4 | (5 << 5));
+    // Enable ADC
+    ADC1->CR2 |= ADC_CR2_ADON;
+}
+
+uint16_t ADC_Read(uint8_t channel) {
+    // Select channel
+    ADC1->SQR3 = (channel & 0x1F);
+    // Start conversion
+    ADC1->CR2 |= ADC_CR2_SWSTART;
+    // Wait for conversion to complete
+    while (!(ADC1->SR & ADC_SR_EOC));
+    // Return conversion result
+    return ADC1->DR;
+}
+
+/*void ADC_Config(void)
 {
     LL_RCC_HSI_Enable();
     while(!LL_RCC_HSI_IsReady()); //wait until HSI READY rise flag
 
     LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_ADC1);
+	
     LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOA);
 
     LL_GPIO_SetPinMode(GPIOA, LDR1_PIN, LL_GPIO_MODE_ANALOG);
@@ -128,7 +157,7 @@ void ADC_Config(void)
     LL_ADC_SetChannelSamplingTime(ADC1, LL_ADC_CHANNEL_5, LL_ADC_SAMPLINGTIME_16CYCLES);
 
     LL_ADC_Enable(ADC1);
-}
+}*/
 
 void SystemClock_Config(void)
 {
