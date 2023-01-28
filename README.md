@@ -10,6 +10,15 @@
 ## AGILE Methodology Model
 ![agile](https://github.com/PotatoBooks/2565-CPE311-PGBM/blob/main/agile-methodology.jpg)
 
+### Sprint 1 Reflaction
+* Basic SG-90 Servo Motor Movement
+* Basic 2 ADC values from 2 LDRs
+* There're some errors with ADC
+
+### Sprint 2 plan
+* Find the solution to fix ADC errors
+
+
 ## Components
 * 2x LDR Sensors
 * 1x SG-90 Servo Motor
