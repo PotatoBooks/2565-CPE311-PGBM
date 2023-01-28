@@ -5,7 +5,7 @@
 
 
 ## Gantt Chart
-![gantt-chart](https://drive.google.com/file/d/1WoIi7e2AqSVx_0v00TGafCAwyhVxpbcw/view?usp=share_link)
+![gantt-chart](https://github.com/PotatoBooks/2565-CPE311-PGBM/blob/main/gantt_chart.png)
 
 ## AGILE Methodology Model
 ![agile](https://github.com/PotatoBooks/2565-CPE311-PGBM/blob/main/agile-methodology.jpg)
