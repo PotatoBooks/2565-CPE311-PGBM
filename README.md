@@ -10,11 +10,12 @@
 ## AGILE Methodology Model
 ![agile](https://github.com/PotatoBooks/2565-CPE311-PGBM/blob/main/agile-methodology.jpg)
 
-## Circuit Diagram
-![gantt-chart](https://github.com/PotatoBooks/2565-CPE311-PGBM/blob/main/CircuitDiagram.png)
-
 ## Components
 * 2x LDR Sensors
 * 1x SG-90 Servo Motor
 * 1x Solar Panel
 * 1x STM32l152
+
+## Circuit Diagram
+![gantt-chart](https://github.com/PotatoBooks/2565-CPE311-PGBM/blob/main/CircuitDiagram.png)
+
