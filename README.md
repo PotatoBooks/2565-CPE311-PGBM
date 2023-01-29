@@ -27,5 +27,5 @@
 ## Circuit Diagram
 ![gantt-chart](https://github.com/PotatoBooks/2565-CPE311-PGBM/blob/main/CircuitDiagram.png)
 
-##Flowchart
+## Flowchart
 ![flowchart](https://github.com/PotatoBooks/2565-CPE311-PGBM/blob/main/Solar%20Tracking%20Flowchart.jpg)
