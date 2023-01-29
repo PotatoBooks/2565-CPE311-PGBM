@@ -27,42 +27,35 @@ void TIM_OC_Config(void); //function prototype
 void ADC_Config(void);
 uint16_t ADC_Read(uint8_t);
 
-int pos = 90; // initial position of the Horizontal movement controlling servo motor
+int CCR = 1500; // initial position of the Horizontal movement controlling servo motor
 int tolerance = 20; // allowable tolerance setting - so solar servo motor isn't constantly in motion
-int val1 = 0;
-int val2 = 0;
+int ldr_diff;
 uint16_t first_ldr;
 uint16_t second_ldr;
 
 int main()
 {
-  SystemClock_Config();
+	SystemClock_Config();
 	TIM_OC_Config();
 	ADC_Config();
-	while(1){
-//		LL_ADC_REG_StartConversionSWStart(ADC1);
-//		while(LL_ADC_IsActiveFlag_EOCS(ADC1) == RESET);
-//		val1 = LL_ADC_REG_ReadConversionData12(ADC1);
-//		val2 = LL_ADC_REG_ReadConversionData12(ADC1);
-	first_ldr = ADC_Read(4);
-	second_ldr = ADC_Read(5);
-		
-	if((abs(val1 - val2) >= tolerance) || (abs(val2 - val1) >= tolerance)) {
-		if(val1 > val2)
-			pos += 1;
-		else if(val1 < val2)
-			pos -= 1;
+	while(1)
+	{
+		first_ldr = ADC_Read(4);
+		second_ldr = ADC_Read(5);
+		ldr_diff = abs(first_ldr - second_ldr);
+		if(ldr_diff >= tolerance)
+		{
+			if(first_ldr > second_ldr && CCR<2000)	//CCR 2000 = 180 degree
+				CCR += 5;	// CCR+-5 will control servo motor to rotate 0.9 degree
+			else if(first_ldr < second_ldr && CCR>1000) //CCR 1000 = 0 degree
+				CCR -= 5;
 		}
-	if(pos > 180)
-			pos = 180;
-	if(pos < 0)
-			pos = 0;
-    LL_TIM_OC_SetCompareCH1(TIM4, pos);
+    LL_TIM_OC_SetCompareCH1(TIM4, CCR);
 
-    LL_mDelay(50);
+    LL_mDelay(100);
 	}
-}
 
+}
 void TIM_Base_Config(void){
 	LL_TIM_InitTypeDef timbase_initstructure;
 	
@@ -100,7 +93,7 @@ void TIM_OC_Config(void){
 	tim_oc_initstructure.OCState = LL_TIM_OCSTATE_DISABLE;
 	tim_oc_initstructure.OCMode = LL_TIM_OCMODE_PWM1;
 	tim_oc_initstructure.OCPolarity = LL_TIM_OCPOLARITY_HIGH;
-	tim_oc_initstructure.CompareValue = 1500;
+	tim_oc_initstructure.CompareValue = CCR;
 	LL_TIM_OC_Init(TIM4, LL_TIM_CHANNEL_CH1, &tim_oc_initstructure);
 
 	/*Start Output Compare in PWM Mode*/
