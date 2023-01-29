@@ -49,10 +49,10 @@ int main()
 				CCR += 5;	// CCR+-5 will control servo motor to rotate 0.9 degree
 			else if(first_ldr < second_ldr && CCR>1000) //CCR 1000 = 0 degree
 				CCR -= 5;
+		
+   			 LL_TIM_OC_SetCompareCH1(TIM4, CCR);
 		}
-    LL_TIM_OC_SetCompareCH1(TIM4, CCR);
-
-    LL_mDelay(100);
+   		 LL_mDelay(100);
 	}
 
 }
