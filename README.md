@@ -18,7 +18,6 @@
 ### Sprint 2 plan
 * Find the solution to fix ADC errors
 
-
 ## Components
 * 2x LDR Sensors
 * 1x SG-90 Servo Motor
@@ -28,3 +27,5 @@
 ## Circuit Diagram
 ![gantt-chart](https://github.com/PotatoBooks/2565-CPE311-PGBM/blob/main/CircuitDiagram.png)
 
+##Flowchart
+![flowchart](https://github.com/PotatoBooks/2565-CPE311-PGBM/blob/main/Solar%20Tracking%20Flowchart.jpg)
