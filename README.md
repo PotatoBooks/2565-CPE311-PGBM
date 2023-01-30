@@ -11,13 +11,12 @@
 ![agile](https://github.com/PotatoBooks/2565-CPE311-PGBM/blob/main/agile-methodology.jpg)
 
 ### Sprint 1 Reflaction
-* Basic SG-90 Servo Motor Movement
+* SG-90 Servo Motor Movement complete
 * Basic 2 ADC values from 2 LDRs
 * There're some errors with ADC
 
 ### Sprint 2 plan
 * Learn ADS1115 for multiple ADCs values
-* Make SG-90 Servo Motor's movement move backward
 
 ## Components
 * 2x LDR Sensors
