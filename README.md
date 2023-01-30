@@ -16,7 +16,8 @@
 * There're some errors with ADC
 
 ### Sprint 2 plan
-* Find the solution to fix ADC errors
+* Learn ADS1115 for multiple ADCs values
+* Make SG-90 Servo Motor's movement move backward
 
 ## Components
 * 2x LDR Sensors
