@@ -1,7 +1,4 @@
 # Solar Tracking with STM32l152RB
-[2565-CPE311-PGBM]
-
-## Requirement
 
 
 ## Gantt Chart
