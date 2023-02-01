@@ -19,13 +19,17 @@
 #define SERVO_PIN LL_GPIO_PIN_6
 
 
-/*already implemented */
 void SystemClock_Config(void);
 void TIM_Base_Config(void); //function prototype
 void TIM_OC_GPIO_Config(void); //function prototype
 void TIM_OC_Config(void); //function prototype
-void ADC_Config(void);
-uint16_t ADC_Read(uint8_t);
+
+void ADC_Init (void);
+void ADC_Enable (void);
+void ADC_Start (int channel);
+void ADC_WaitForConv (void);
+uint16_t ADC_GetVal (void);
+void ADC_Disable (void);
 
 int CCR = 1500; // initial position of the Horizontal movement controlling servo motor
 int tolerance = 20; // allowable tolerance setting - so solar servo motor isn't constantly in motion
@@ -37,11 +41,19 @@ int main()
 {
 	SystemClock_Config();
 	TIM_OC_Config();
-	ADC_Config();
-	while(1)
-	{
-		first_ldr = ADC_Read(4);
-		second_ldr = ADC_Read(5);
+	ADC_Init();
+	ADC_Enable();
+	
+	while(1){
+		
+		ADC_Start (4);
+		ADC_WaitForConv ();
+		first_ldr = ADC_GetVal();
+		
+		ADC_Start (5);
+		ADC_WaitForConv ();
+		second_ldr = ADC_GetVal();
+		
 		ldr_diff = abs(first_ldr - second_ldr);
 		if(ldr_diff >= tolerance)
 		{
@@ -101,56 +113,92 @@ void TIM_OC_Config(void){
 	LL_TIM_EnableCounter(TIM4);
 }
 
-void ADC_Config(void) {
-    // Enable clock for ADC1
-    RCC->APB2ENR |= RCC_APB2ENR_ADC1EN;
-    // Set ADC to single conversion mode
-    ADC1->CR2 &= ~ADC_CR2_CONT;
-    // Enable channel 4 and 5
-    ADC1->CR1 |= ADC_CR1_EOCIE;
-    ADC1->SQR3 |= (4 | (5 << 5));
-    // Enable ADC
-    ADC1->CR2 |= ADC_CR2_ADON;
-}
-
-uint16_t ADC_Read(uint8_t channel) {
-    // Select channel
-    ADC1->SQR3 = (channel & 0x1F);
-    // Start conversion
-    ADC1->CR2 |= ADC_CR2_SWSTART;
-    // Wait for conversion to complete
-    while (!(ADC1->SR & ADC_SR_EOC));
-    // Return conversion result
-    return ADC1->DR;
-}
-
-/*void ADC_Config(void)
-{
-    LL_RCC_HSI_Enable();
-    while(!LL_RCC_HSI_IsReady()); //wait until HSI READY rise flag
-
-    LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_ADC1);
+void ADC_Init (void){
+	/************** STEPS TO FOLLOW *****************
+	1. Enable ADC and GPIO clock
+	2. Set the prescalar in the Common Control Register (CCR)
+	3. Set the Scan Mode and Resolution in the Control Register 1 (CR1)
+	4. Set the Continuous Conversion, EOC, and Data Alignment in Control Reg 2 (CR2)
+	5. Set the Sampling Time for the channels in ADC_SMPRx
+	6. Set the Regular channel sequence length in ADC_SQR1
+	7. Set the Respective GPIO PINs in the Analog Mode
+	************************************************/
 	
-    LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOA);
+//1. Enable ADC and GPIO clock
+	RCC->APB2ENR |= (1<<9);  // enable ADC1 clock
+	RCC->AHBENR |= (1<<0);  // enable GPIOA clock
+	
+//2. Set the prescalar in the Common Control Register (CCR)	
+	//ADC->CCR |= 1<<16;  		 // PCLK2 divide by 4
+	
+//3. Set the Scan Mode and Resolution in the Control Register 1 (CR1)	
+	ADC1->CR1 = (1<<8);    // SCAN mode enabled
+	ADC1->CR1 &= ~(3<<24);   // 12 bit RES
+	
+//4. Set the Continuous Conversion, EOC, and Data Alignment in Control Reg 2 (CR2)
+	ADC1->CR2 |= (1<<1);     // enable continuous conversion mode
+	ADC1->CR2 |= (1<<10);    // EOC after each conversion
+	ADC1->CR2 &= ~(1<<11);   // Data Alignment RIGHT
+	
+//5. Set the Sampling Time for the channels	
+	ADC1->SMPR3 |= (2<<12);  // Sampling time of 3 cycles for channel 4 and channel 5
+	ADC1->SMPR3 |= (2<<15);
 
-    LL_GPIO_SetPinMode(GPIOA, LDR1_PIN, LL_GPIO_MODE_ANALOG);
-    LL_GPIO_SetPinMode(GPIOA, LDR2_PIN, LL_GPIO_MODE_ANALOG);
+//6. Set the Regular channel sequence length in ADC_SQR1
+	ADC1->SQR1 |= (1<<20);   // SQR1_L =1 for 2 conversions
+	
+//7. Set the Respective GPIO PINs in the Analog Mode	
+	GPIOA->MODER |= (3<<10);  // analog mode for PA 5 (chennel 5)
+	GPIOA->MODER |= (3<<8);  // analog mode for PA 4 (channel 4)
+}
 
-    LL_ADC_InitTypeDef ADC_InitStruct;
-    LL_ADC_StructInit(&ADC_InitStruct);
-    ADC_InitStruct.Resolution = LL_ADC_RESOLUTION_12B;
-    ADC_InitStruct.DataAlignment = LL_ADC_DATA_ALIGN_RIGHT;
-    ADC_InitStruct.SequencersScanMode = LL_ADC_SEQ_SCAN_DISABLE;
-    LL_ADC_Init(ADC1, &ADC_InitStruct);
+void ADC_Enable (void){
+	/************** STEPS TO FOLLOW *****************
+	1. Enable the ADC by setting ADON bit in CR2
+	2. Wait for ADC to stabilize (approx 10us) 
+	************************************************/
+	ADC1->CR2 |= 1<<0;   // ADON =1 enable ADC1
+	
+	uint32_t delay = 10000;
+	while (delay--);
+}
 
-    LL_ADC_REG_SetSequencerRanks(ADC1, LL_ADC_REG_RANK_1, LL_ADC_CHANNEL_4);
-    LL_ADC_SetChannelSamplingTime(ADC1, LL_ADC_CHANNEL_4, LL_ADC_SAMPLINGTIME_16CYCLES);
+void ADC_Start (int channel){
+	/************** STEPS TO FOLLOW *****************
+	1. Set the channel Sequence in the SQR Register
+	2. Clear the Status register
+	3. Start the Conversion by Setting the SWSTART bit in CR2
+	************************************************/
+	
+	
+/**	Since we will be polling for each channel, here we will keep one channel in the sequence at a time
+		ADC1->SQR3 |= (channel<<0); will just keep the respective channel in the sequence for the conversion **/
+	
+	ADC1->SQR5 = 0;
+	ADC1->SQR5 |= (channel<<0);    // conversion in regular sequence
+	
+	ADC1->SR = 0;        // clear the status register
+	
+	ADC1->CR2 |= (1<<30);  // start the conversion
+}
 
-    LL_ADC_REG_SetSequencerRanks(ADC1, LL_ADC_REG_RANK_2, LL_ADC_CHANNEL_5);
-    LL_ADC_SetChannelSamplingTime(ADC1, LL_ADC_CHANNEL_5, LL_ADC_SAMPLINGTIME_16CYCLES);
+void ADC_WaitForConv (void){
+	/*************************************************
+	EOC Flag will be set, once the conversion is finished
+	*************************************************/
+	while ((ADC1->SR & (1<<1))==0);  // wait for EOC flag to set
+}
 
-    LL_ADC_Enable(ADC1);
-}*/
+uint16_t ADC_GetVal (void){
+	return ADC1->DR;  // Read the Data Register
+}
+
+void ADC_Disable (void){
+	/************** STEPS TO FOLLOW *****************
+	1. Disable the ADC by Clearing ADON bit in CR2
+	************************************************/	
+	ADC1->CR2 &= ~(1<<0);  // Disable ADC
+}
 
 void SystemClock_Config(void)
 {
