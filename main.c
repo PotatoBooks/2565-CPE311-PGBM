@@ -179,14 +179,14 @@ void ADC_Start (int channel){
 	
 	ADC1->SR = 0;        // clear the status register
 	
-	ADC1->CR2 |= (1<<30);  // start the conversion
+	//ADC1->CR2 |= (1<<30);  // start the conversion
 }
 
 void ADC_WaitForConv (void){
 	/*************************************************
 	EOC Flag will be set, once the conversion is finished
 	*************************************************/
-	while ((ADC1->SR & (1<<1))==0);  // wait for EOC flag to set
+	while ((ADC1->SR & (1<<1))==0) ADC1->CR2 |= (1<<30);  // wait for EOC flag to set
 }
 
 uint16_t ADC_GetVal (void){
