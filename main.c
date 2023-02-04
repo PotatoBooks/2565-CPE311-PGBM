@@ -31,11 +31,11 @@ void ADC_WaitForConv (void);
 uint16_t ADC_GetVal (void);
 void ADC_Disable (void);
 
-int CCR = 1500; // initial position of the Horizontal movement controlling servo motor
-int tolerance = 20; // allowable tolerance setting - so solar servo motor isn't constantly in motion
+int CCR = 800; // initial position of the Horizontal movement controlling servo motor
+int tolerance = 100; // allowable tolerance setting - so solar servo motor isn't constantly in motion
 int ldr_diff;
-uint16_t first_ldr;
-uint16_t second_ldr;
+uint16_t first_ldr = 0;
+uint16_t second_ldr = 0;
 
 int main()
 {
@@ -45,26 +45,33 @@ int main()
 	ADC_Enable();
 	
 	while(1){
-		
-		ADC_Start (4);
-		ADC_WaitForConv ();
+
+		ADC_Start(4);
+		ADC_WaitForConv();
 		first_ldr = ADC_GetVal();
-		
-		ADC_Start (5);
-		ADC_WaitForConv ();
+		ADC1->DR = 0;
+		ADC_Start(5);
+		ADC_WaitForConv();
 		second_ldr = ADC_GetVal();
+
+		ADC_Disable();
 		
 		ldr_diff = abs(first_ldr - second_ldr);
 		if(ldr_diff >= tolerance)
 		{
-			if(first_ldr > second_ldr && CCR<2000)	//CCR 2000 = 180 degree
+			if(first_ldr > second_ldr && CCR<1800)	//CCR 2000 = 180 degree
 				CCR += 5;	// CCR+-5 will control servo motor to rotate 0.9 degree
-			else if(first_ldr < second_ldr && CCR>1000) //CCR 1000 = 0 degree
+			else if(first_ldr < second_ldr && CCR>400) //CCR 1000 = 0 degree
 				CCR -= 5;
 		
    			 LL_TIM_OC_SetCompareCH1(TIM4, CCR);
 		}
-   		 LL_mDelay(100);
+//		if(CCR >= 1800)
+//			CCR = 1800;
+//		if(CCR <= 400)
+//			CCR = 400;
+		LL_mDelay(50);
+		ADC_Enable();
 	}
 
 }
@@ -113,23 +120,14 @@ void TIM_OC_Config(void){
 	LL_TIM_EnableCounter(TIM4);
 }
 
+
 void ADC_Init (void){
-	/************** STEPS TO FOLLOW *****************
-	1. Enable ADC and GPIO clock
-	2. Set the prescalar in the Common Control Register (CCR)
-	3. Set the Scan Mode and Resolution in the Control Register 1 (CR1)
-	4. Set the Continuous Conversion, EOC, and Data Alignment in Control Reg 2 (CR2)
-	5. Set the Sampling Time for the channels in ADC_SMPRx
-	6. Set the Regular channel sequence length in ADC_SQR1
-	7. Set the Respective GPIO PINs in the Analog Mode
-	************************************************/
-	
 //1. Enable ADC and GPIO clock
 	RCC->APB2ENR |= (1<<9);  // enable ADC1 clock
 	RCC->AHBENR |= (1<<0);  // enable GPIOA clock
 	
 //2. Set the prescalar in the Common Control Register (CCR)	
-	//ADC->CCR |= 1<<16;  		 // PCLK2 divide by 4
+	ADC->CCR |= 1<<16;  		 // PCLK2 divide by 4
 	
 //3. Set the Scan Mode and Resolution in the Control Register 1 (CR1)	
 	ADC1->CR1 = (1<<8);    // SCAN mode enabled
@@ -153,24 +151,13 @@ void ADC_Init (void){
 }
 
 void ADC_Enable (void){
-	/************** STEPS TO FOLLOW *****************
-	1. Enable the ADC by setting ADON bit in CR2
-	2. Wait for ADC to stabilize (approx 10us) 
-	************************************************/
 	ADC1->CR2 |= 1<<0;   // ADON =1 enable ADC1
 	
 	uint32_t delay = 10000;
 	while (delay--);
 }
 
-void ADC_Start (int channel){
-	/************** STEPS TO FOLLOW *****************
-	1. Set the channel Sequence in the SQR Register
-	2. Clear the Status register
-	3. Start the Conversion by Setting the SWSTART bit in CR2
-	************************************************/
-	
-	
+void ADC_Start (int channel){	
 /**	Since we will be polling for each channel, here we will keep one channel in the sequence at a time
 		ADC1->SQR3 |= (channel<<0); will just keep the respective channel in the sequence for the conversion **/
 	
@@ -183,10 +170,8 @@ void ADC_Start (int channel){
 }
 
 void ADC_WaitForConv (void){
-	/*************************************************
-	EOC Flag will be set, once the conversion is finished
-	*************************************************/
-	while ((ADC1->SR & (1<<1))==0) ADC1->CR2 |= (1<<30);  // wait for EOC flag to set
+	ADC1->CR2 |= (1<<30);
+	while ((ADC1->SR & (1<<1))==0);  // wait for EOC flag to set
 }
 
 uint16_t ADC_GetVal (void){
@@ -194,9 +179,6 @@ uint16_t ADC_GetVal (void){
 }
 
 void ADC_Disable (void){
-	/************** STEPS TO FOLLOW *****************
-	1. Disable the ADC by Clearing ADON bit in CR2
-	************************************************/	
 	ADC1->CR2 &= ~(1<<0);  // Disable ADC
 }
 
