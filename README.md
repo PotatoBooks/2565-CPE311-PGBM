@@ -12,8 +12,12 @@
 * Basic 2 ADC values from 2 LDRs
 * There're some errors with ADC
 
-### Sprint 2 plan
-* Learn ADS1115 for multiple ADCs values
+### Sprint 2 Reflaction
+* Fixed ADC Bug
+* Adjusted Servo Motor's angle
+
+### Sprint 3 Plan
+* Testing and Debugging
 
 ## Components
 * 2x LDR Sensors
