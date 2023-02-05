@@ -18,7 +18,6 @@
 #define LDR2_PIN LL_GPIO_PIN_5
 #define SERVO_PIN LL_GPIO_PIN_6
 
-
 void SystemClock_Config(void);
 void TIM_Base_Config(void); //function prototype
 void TIM_OC_GPIO_Config(void); //function prototype
@@ -31,11 +30,11 @@ void ADC_WaitForConv (void);
 uint16_t ADC_GetVal (void);
 void ADC_Disable (void);
 
-int CCR = 800; // initial position of the Horizontal movement controlling servo motor
-int tolerance = 100; // allowable tolerance setting - so solar servo motor isn't constantly in motion
+int CCR = 1500; // initial position of the Horizontal movement controlling servo motor
+int tolerance = 20; // allowable tolerance setting - so solar servo motor isn't constantly in motion
 int ldr_diff;
-uint16_t first_ldr = 0;
-uint16_t second_ldr = 0;
+uint16_t first_ldr;
+uint16_t second_ldr;
 
 int main()
 {
@@ -44,42 +43,29 @@ int main()
 	ADC_Init();
 	ADC_Enable();
 	
-	while(1){
-
+	while(1)
+   {	
 		ADC_Start(4);
 		ADC_WaitForConv();
 		first_ldr = ADC_GetVal();
-		ADC1->DR = 0;
+		
 		ADC_Start(5);
-		ADC_WaitForConv();
+		ADC_WaitForConv ();
 		second_ldr = ADC_GetVal();
-
-		ADC_Disable();
 		
-		ldr_diff = abs(first_ldr - second_ldr);
-		if(ldr_diff >= tolerance)
-		{
-			if(first_ldr > second_ldr && CCR<1800)	//CCR 2000 = 180 degree
+      if(first_ldr > second_ldr && CCR<2500)	//CCR 2000 = 180 degree
 				CCR += 5;	// CCR+-5 will control servo motor to rotate 0.9 degree
-			else if(first_ldr < second_ldr && CCR>400) //CCR 1000 = 0 degree
+			else if(first_ldr < second_ldr && CCR>500) //CCR 1000 = 0 degree
 				CCR -= 5;
-		
-   			 LL_TIM_OC_SetCompareCH1(TIM4, CCR);
-		}
-//		if(CCR >= 1800)
-//			CCR = 1800;
-//		if(CCR <= 400)
-//			CCR = 400;
-		LL_mDelay(50);
-		ADC_Enable();
-	}
 
+      LL_TIM_OC_SetCompareCH1(TIM4, CCR);   
+      LL_mDelay(50);
+	}
 }
+
 void TIM_Base_Config(void){
-	LL_TIM_InitTypeDef timbase_initstructure;
-	
+	LL_TIM_InitTypeDef timbase_initstructure;	
 	LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM4);
-	
 	timbase_initstructure.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
 	timbase_initstructure.CounterMode = LL_TIM_COUNTERMODE_UP;
 	timbase_initstructure.Autoreload = TIMx_ARR - 1;
@@ -88,12 +74,9 @@ void TIM_Base_Config(void){
 	LL_TIM_EnableCounter(TIM4);
 }
 
-
 void TIM_OC_GPIO_Config(void){
-	LL_GPIO_InitTypeDef gpio_initstructure;
-	
+	LL_GPIO_InitTypeDef gpio_initstructure;	
 	LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOB);
-
 	gpio_initstructure.Pin = SERVO_PIN;
 	gpio_initstructure.Mode = LL_GPIO_MODE_ALTERNATE;
 	gpio_initstructure.Alternate = LL_GPIO_AF_2;
@@ -101,12 +84,10 @@ void TIM_OC_GPIO_Config(void){
 	gpio_initstructure.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
 	gpio_initstructure.Pull = LL_GPIO_PULL_UP;
 	LL_GPIO_Init(GPIOB,&gpio_initstructure);
-
 }
 
 void TIM_OC_Config(void){
-	LL_TIM_OC_InitTypeDef tim_oc_initstructure;
-	
+	LL_TIM_OC_InitTypeDef tim_oc_initstructure;	
 	TIM_OC_GPIO_Config();
 	TIM_Base_Config();
 	tim_oc_initstructure.OCState = LL_TIM_OCSTATE_DISABLE;
@@ -114,12 +95,10 @@ void TIM_OC_Config(void){
 	tim_oc_initstructure.OCPolarity = LL_TIM_OCPOLARITY_HIGH;
 	tim_oc_initstructure.CompareValue = CCR;
 	LL_TIM_OC_Init(TIM4, LL_TIM_CHANNEL_CH1, &tim_oc_initstructure);
-
 	/*Start Output Compare in PWM Mode*/
 	LL_TIM_CC_EnableChannel(TIM4, LL_TIM_CHANNEL_CH1);
 	LL_TIM_EnableCounter(TIM4);
 }
-
 
 void ADC_Init (void){
 //1. Enable ADC and GPIO clock
@@ -127,14 +106,14 @@ void ADC_Init (void){
 	RCC->AHBENR |= (1<<0);  // enable GPIOA clock
 	
 //2. Set the prescalar in the Common Control Register (CCR)	
-	ADC->CCR |= 1<<16;  		 // PCLK2 divide by 4
+	//ADC->CCR |= 1<<16;  		 // PCLK2 divide by 4
 	
 //3. Set the Scan Mode and Resolution in the Control Register 1 (CR1)	
-	ADC1->CR1 = (1<<8);    // SCAN mode enabled
+	//ADC1->CR1 = (1<<8);    // SCAN mode enabled
 	ADC1->CR1 &= ~(3<<24);   // 12 bit RES
 	
 //4. Set the Continuous Conversion, EOC, and Data Alignment in Control Reg 2 (CR2)
-	ADC1->CR2 |= (1<<1);     // enable continuous conversion mode
+	//ADC1->CR2 |= (1<<1);     // enable continuous conversion mode
 	ADC1->CR2 |= (1<<10);    // EOC after each conversion
 	ADC1->CR2 &= ~(1<<11);   // Data Alignment RIGHT
 	
@@ -152,9 +131,9 @@ void ADC_Init (void){
 
 void ADC_Enable (void){
 	ADC1->CR2 |= 1<<0;   // ADON =1 enable ADC1
-	
-	uint32_t delay = 10000;
-	while (delay--);
+//	
+//	uint32_t delay = 10000;
+//	while (delay--);
 }
 
 void ADC_Start (int channel){	
@@ -166,12 +145,12 @@ void ADC_Start (int channel){
 	
 	ADC1->SR = 0;        // clear the status register
 	
-	//ADC1->CR2 |= (1<<30);  // start the conversion
+//	ADC1->CR2 |= (1<<30);  // start the conversion
 }
 
 void ADC_WaitForConv (void){
-	ADC1->CR2 |= (1<<30);
-	while ((ADC1->SR & (1<<1))==0);  // wait for EOC flag to set
+	do { ADC1->CR2 |= (1<<30); }
+   while ((ADC1->SR & (1<<1))==0);  // wait for EOC flag to set
 }
 
 uint16_t ADC_GetVal (void){
