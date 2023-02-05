@@ -31,8 +31,6 @@ uint16_t ADC_GetVal (void);
 void ADC_Disable (void);
 
 int CCR = 1500; // initial position of the Horizontal movement controlling servo motor
-int tolerance = 20; // allowable tolerance setting - so solar servo motor isn't constantly in motion
-int ldr_diff;
 uint16_t first_ldr;
 uint16_t second_ldr;
 
@@ -53,9 +51,9 @@ int main()
 		ADC_WaitForConv ();
 		second_ldr = ADC_GetVal();
 		
-      if(first_ldr > second_ldr && CCR<2500)	//CCR 2000 = 180 degree
+      	if(first_ldr > second_ldr && CCR<2500)	//CCR 2000 = 180 degree
 				CCR += 5;	// CCR+-5 will control servo motor to rotate 0.9 degree
-			else if(first_ldr < second_ldr && CCR>500) //CCR 1000 = 0 degree
+	else if(first_ldr < second_ldr && CCR>500) //CCR 1000 = 0 degree
 				CCR -= 5;
 
       LL_TIM_OC_SetCompareCH1(TIM4, CCR);   
@@ -101,30 +99,27 @@ void TIM_OC_Config(void){
 }
 
 void ADC_Init (void){
-//1. Enable ADC and GPIO clock
+// Enable ADC and GPIO clock
 	RCC->APB2ENR |= (1<<9);  // enable ADC1 clock
 	RCC->AHBENR |= (1<<0);  // enable GPIOA clock
 	
-//2. Set the prescalar in the Common Control Register (CCR)	
-	//ADC->CCR |= 1<<16;  		 // PCLK2 divide by 4
-	
-//3. Set the Scan Mode and Resolution in the Control Register 1 (CR1)	
+// Set the Scan Mode and Resolution in the Control Register 1 (CR1)	
 	//ADC1->CR1 = (1<<8);    // SCAN mode enabled
 	ADC1->CR1 &= ~(3<<24);   // 12 bit RES
 	
-//4. Set the Continuous Conversion, EOC, and Data Alignment in Control Reg 2 (CR2)
+// Set the Continuous Conversion, EOC, and Data Alignment in Control Reg 2 (CR2)
 	//ADC1->CR2 |= (1<<1);     // enable continuous conversion mode
 	ADC1->CR2 |= (1<<10);    // EOC after each conversion
 	ADC1->CR2 &= ~(1<<11);   // Data Alignment RIGHT
 	
-//5. Set the Sampling Time for the channels	
+// Set the Sampling Time for the channels	
 	ADC1->SMPR3 |= (2<<12);  // Sampling time of 3 cycles for channel 4 and channel 5
 	ADC1->SMPR3 |= (2<<15);
 
-//6. Set the Regular channel sequence length in ADC_SQR1
+// Set the Regular channel sequence length in ADC_SQR1
 	ADC1->SQR1 |= (1<<20);   // SQR1_L =1 for 2 conversions
 	
-//7. Set the Respective GPIO PINs in the Analog Mode	
+// Set the Respective GPIO PINs in the Analog Mode	
 	GPIOA->MODER |= (3<<10);  // analog mode for PA 5 (chennel 5)
 	GPIOA->MODER |= (3<<8);  // analog mode for PA 4 (channel 4)
 }
@@ -137,8 +132,6 @@ void ADC_Enable (void){
 }
 
 void ADC_Start (int channel){	
-/**	Since we will be polling for each channel, here we will keep one channel in the sequence at a time
-		ADC1->SQR3 |= (channel<<0); will just keep the respective channel in the sequence for the conversion **/
 	
 	ADC1->SQR5 = 0;
 	ADC1->SQR5 |= (channel<<0);    // conversion in regular sequence
