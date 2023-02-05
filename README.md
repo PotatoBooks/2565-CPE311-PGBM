@@ -1,10 +1,10 @@
 # Solar Tracking with STM32l152RB
 
+## Requirement
+
 
 ## Gantt Chart
 ![gantt-chart](https://github.com/PotatoBooks/2565-CPE311-PGBM/blob/main/gantt_chart.png)
-
-## Requirement
 
 ## AGILE Methodology Model
 ![agile](https://github.com/PotatoBooks/2565-CPE311-PGBM/blob/main/agile-methodology.jpg)
