@@ -30,7 +30,9 @@ void ADC_WaitForConv (void);
 uint16_t ADC_GetVal (void);
 void ADC_Disable (void);
 
-int CCR = 1500; // initial position of the Horizontal movement controlling servo motor
+int CCR = 1100; // initial position of the Horizontal movement controlling servo motor
+int tolerance = 200; // allowable tolerance setting - so solar servo motor isn't constantly in motion
+int ldr_diff;
 uint16_t first_ldr;
 uint16_t second_ldr;
 
@@ -41,21 +43,21 @@ int main()
 	ADC_Init();
 	ADC_Enable();
 	
-	while(1)
-   {	
+	while(1){	
 		ADC_Start(4);
 		ADC_WaitForConv();
 		first_ldr = ADC_GetVal();
-		
+		ADC1->DR = 0;
 		ADC_Start(5);
 		ADC_WaitForConv ();
 		second_ldr = ADC_GetVal();
 		
-      	if(first_ldr > second_ldr && CCR<2500)	//CCR 2000 = 180 degree
+		if(abs(first_ldr-second_ldr)> tolerance){
+      if(first_ldr > second_ldr && CCR<2000)	//CCR 2000 = 180 degree
 				CCR += 5;	// CCR+-5 will control servo motor to rotate 0.9 degree
-	else if(first_ldr < second_ldr && CCR>500) //CCR 1000 = 0 degree
+			else if(first_ldr < second_ldr && CCR>500) //CCR 1000 = 0 degree
 				CCR -= 5;
-
+		}
       LL_TIM_OC_SetCompareCH1(TIM4, CCR);   
       LL_mDelay(50);
 	}
@@ -126,9 +128,6 @@ void ADC_Init (void){
 
 void ADC_Enable (void){
 	ADC1->CR2 |= 1<<0;   // ADON =1 enable ADC1
-//	
-//	uint32_t delay = 10000;
-//	while (delay--);
 }
 
 void ADC_Start (int channel){	
