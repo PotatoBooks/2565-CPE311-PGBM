@@ -18,8 +18,8 @@
 * Fixed ADC Bug
 * Adjusted Servo Motor's angle
 
-### Sprint 3 Plan
-* Testing and Debugging
+### Sprint 3 Reflaction
+* Testing and Debugging --> system work perfectly
 
 ## Model Design
 
