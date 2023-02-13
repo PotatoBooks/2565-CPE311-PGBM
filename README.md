@@ -1,7 +1,7 @@
 # Solar Tracking with STM32l152RB
 
 ## Requirement
-
+สร้างระบบ Solar tracking ให้กับแผงโซลาร์เซลล์ โดยใช้บอร์ด STM32L152RB เป็นตัวควบคุม
 
 ## Gantt Chart
 ![gantt-chart](https://github.com/PotatoBooks/2565-CPE311-PGBM/blob/main/gantt_chart.png)
@@ -9,9 +9,12 @@
 ## AGILE Methodology Model
 ![agile](https://github.com/PotatoBooks/2565-CPE311-PGBM/blob/main/agile-methodology.jpg)
 
-### Sprint 1 Reflaction
+### Sprint 1
+#### Plan
+* Develope SG-90 Servo Motor Movement
+* Get 2 ADC values from 2 LDRs Correctly
+#### Reflaction
 * SG-90 Servo Motor Movement complete
-* Basic 2 ADC values from 2 LDRs
 * There're some errors with ADC
 
 ### Sprint 2 Reflaction
