@@ -14,22 +14,23 @@
 * Develope SG-90 Servo Motor Movement
 * Get 2 ADC values from 2 LDRs Correctly
 #### Reflaction
-* SG-90 Servo Motor Movement complete
-* There're some errors with ADC
+* SG-90 Servo Motor move perfectly 
+* Get 2 ADC values from 2 LDRs correctly
 
 ### Sprint 2
 #### Plan
-* Fix ADC Bug
-* Adjust Servo Motor's angle
+* Integrate the system
 #### Reflaction
-* Fixed ADC Bug
-* Adjust Servo Motor's angle
+* 2 ADC values from 2 LDRs are not correct
+* Need to Adjust Servo Motor's angle
 * Integrated the system
 
 ### Sprin 3
 #### Plan
+* Fix ADC Problem
 * Testing and Debugging 
 #### Reflaction
+* Fixed ADC problem
 * system work according to requirement
 
 ## Model Design
