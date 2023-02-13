@@ -42,7 +42,7 @@
 * 1x STM32l152
 
 ### Block Diagram
-![block-diagram]()
+![block-diagram](https://github.com/PotatoBooks/2565-CPE311-PGBM/blob/main/block-diagram.png)
 
 ### Circuit Diagram
 ![circuit-diagram](https://github.com/PotatoBooks/2565-CPE311-PGBM/blob/main/CircuitDiagram.png)
