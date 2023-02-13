@@ -17,12 +17,20 @@
 * SG-90 Servo Motor Movement complete
 * There're some errors with ADC
 
-### Sprint 2 Reflaction
+### Sprint 2
+#### Plan
+* Fix ADC Bug
+* Adjust Servo Motor's angle
+#### Reflaction
 * Fixed ADC Bug
-* Adjusted Servo Motor's angle
+* Adjust Servo Motor's angle
+* Integrated the system
 
-### Sprint 3 Reflaction
-* Testing and Debugging --> system work perfectly
+### Sprin 3
+#### Plan
+* Testing and Debugging 
+#### Reflaction
+* system work according to requirement
 
 ## Model Design
 
