@@ -34,15 +34,18 @@
 
 ## Model Design
 
-
-## Components
+### Components
 * 2x LDR Sensors
+* 2x 10K ohm Resistor
 * 1x SG-90 Servo Motor
 * 1x Solar Panel
 * 1x STM32l152
 
-## Circuit Diagram
-![gantt-chart](https://github.com/PotatoBooks/2565-CPE311-PGBM/blob/main/CircuitDiagram.png)
+### Block Diagram
+![block-diagram]()
 
-## Flowchart
+### Circuit Diagram
+![circuit-diagram](https://github.com/PotatoBooks/2565-CPE311-PGBM/blob/main/CircuitDiagram.png)
+
+### Flowchart
 ![flowchart](https://github.com/PotatoBooks/2565-CPE311-PGBM/blob/main/Solar%20Tracking%20Flowchart.jpg)
