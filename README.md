@@ -4,7 +4,7 @@
 สร้างระบบ Solar tracking ให้กับแผงโซลาร์เซลล์ โดยใช้บอร์ด STM32L152RB เป็นตัวควบคุม
 
 ## Gantt Chart
-![gantt-chart]()
+![gantt-chart](https://github.com/PotatoBooks/2565-CPE311-PGBM/blob/main/gantt-chart.png)
 
 ## AGILE Methodology Model
 ![agile](https://github.com/PotatoBooks/2565-CPE311-PGBM/blob/main/agile-methodology.png)
